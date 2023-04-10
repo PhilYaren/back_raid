@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(255)
+  userName  String   @unique @map("username") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  statistics Statistic[]
+
+  @@map("users")
+}
+
+model Statistic {
+  id       Int     @id @default(autoincrement())
+  gameName String  @map("game_name") @db.VarChar(255)
+  players  Int
+  result   Boolean
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  playerId Int  @map("player_id")
+  player   User @relation(fields: [playerId], references: [id])
+
+  @@map("statistics")
+}
+
+model Card {
+  id       Int    @id @default(autoincrement())
+  cardName String @map("card_name") @db.VarChar(255)
+  strength Int
+  wisdom   Int
+  magic    Int
+  health   Int
+  forward  Int
+  backward Int
+
+  image       String  @db.VarChar(255)
+  description String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("cards")
+}
