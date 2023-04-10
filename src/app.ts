@@ -4,6 +4,7 @@ import session from 'express-session';
 import FS from 'session-file-store';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import morgan from 'morgan';
 dotenv.config();
 
 const FileStore = FS(session);
@@ -25,7 +26,7 @@ const sessionConFig: session.SessionOptions = {
   },
 };
 
-const PORT: number | string = process.env.PORT || 3000;
+const PORT: number = Number(process.env.PORT) || 3000;
 
 const app = express();
 
