@@ -41,7 +41,9 @@ app.use(cors(corsOptions));
 
 const server = http.createServer(app);
 
-server.on('upgrade', (request, socket, head) => {
+app.locals.wsClients = new Map()
+
+server.on('upgrade', (request: any, socket: any, head: any) => {
   console.log('Parsing session from request...');
   wss.handleUpgrade(request, socket, head, (ws) => {
     wss.emit('connection', ws, request, app.locals.wsClients);
@@ -49,7 +51,6 @@ server.on('upgrade', (request, socket, head) => {
 
 }
 
-app.locals.wsClients = new Map()
 
 app.listen(PORT, () => {
   console.log('Server is running on port 3000');
