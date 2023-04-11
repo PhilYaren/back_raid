@@ -13,8 +13,9 @@ wss.on('connection', (ws: Websoket) => {
   console.log('connected');
 
   ws.on('message', (message: string) => {
-    console.log(message);
-    ws.send('Hello from server');
+    const newMessage = JSON.parse(message);
+
+    ws.send(JSON.stringify(newMessage));
   });
   ws.on('close', () => {
     console.log('disconnected');

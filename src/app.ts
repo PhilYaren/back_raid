@@ -6,7 +6,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import * as http from 'http';
-import wss from './routes/websoket.routes';
+import wss from './websoket/server';
+import userRoutes from './routes/user.routes';
 dotenv.config();
 
 const FileStore = FS(session);
@@ -37,6 +38,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(session(sessionConFig));
 app.use(cors(corsOptions));
+
+app.use('/user', userRoutes);
 
 const server = http.createServer(app);
 
