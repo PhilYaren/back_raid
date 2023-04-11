@@ -5,8 +5,6 @@ const Server = Websoket.WebSocketServer;
 const wss = new Server({
   clientTracking: false,
   noServer: true,
-  host: 'localhost',
-  port: 5173,
 });
 
 wss.on('connection', (ws: Websoket) => {

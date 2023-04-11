@@ -1,27 +1,31 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+  const hashedPassword = await bcrypt.hash('password', 10);
   const cards = await prisma.card.createMany({
-    data: [{
-      cardName: 'cover',
-      strength: 0,
-      wisdom: 0,
-      magic: 0,
-      health: 0,
-      forward: 0,
-      backward: 0,
-      image: '/img/cover.jpg'
-    }, {
-      cardName: 'beast',
-      strength: 10,
-      wisdom: 10,
-      magic: 8,
-      health: 6,
-      forward: 6,
-      backward: 5,
-      image: '/img/beast.jpg'
-    },
+    data: [
+      {
+        cardName: 'cover',
+        strength: 0,
+        wisdom: 0,
+        magic: 0,
+        health: 0,
+        forward: 0,
+        backward: 0,
+        image: '/img/cover.jpg',
+      },
+      {
+        cardName: 'beast',
+        strength: 10,
+        wisdom: 10,
+        magic: 8,
+        health: 6,
+        forward: 6,
+        backward: 5,
+        image: '/img/beast.jpg',
+      },
       {
         cardName: 'bonaparte',
         strength: 4,
@@ -30,7 +34,7 @@ async function main() {
         health: 11,
         forward: 10,
         backward: 8,
-        image: '/img/bonaparte.jpg'
+        image: '/img/bonaparte.jpg',
       },
       {
         cardName: 'dwarf',
@@ -40,7 +44,7 @@ async function main() {
         health: 6,
         forward: 3,
         backward: 5,
-        image: '/img/dwarf.jpg'
+        image: '/img/dwarf.jpg',
       },
       {
         cardName: 'hunter',
@@ -50,7 +54,7 @@ async function main() {
         health: 2,
         forward: 2,
         backward: 3,
-        image: '/img/hunter.jpg'
+        image: '/img/hunter.jpg',
       },
       {
         cardName: 'licho',
@@ -60,7 +64,7 @@ async function main() {
         health: 9,
         forward: 8,
         backward: 6,
-        image: '/img/licho.jpg'
+        image: '/img/licho.jpg',
       },
       {
         cardName: 'mermaid',
@@ -70,7 +74,7 @@ async function main() {
         health: 12,
         forward: 9,
         backward: 6,
-        image: '/img/mermaid.jpg'
+        image: '/img/mermaid.jpg',
       },
       {
         cardName: 'mirror',
@@ -80,7 +84,7 @@ async function main() {
         health: 1,
         forward: 5,
         backward: 4,
-        image: '/img/mirror.jpg'
+        image: '/img/mirror.jpg',
       },
       {
         cardName: 'mummy',
@@ -90,7 +94,7 @@ async function main() {
         health: 7,
         forward: 6,
         backward: 4,
-        image: '/img/mummy.jpg'
+        image: '/img/mummy.jpg',
       },
       {
         cardName: 'police',
@@ -100,7 +104,7 @@ async function main() {
         health: 11,
         forward: 7,
         backward: 5,
-        image: '/img/police.jpg'
+        image: '/img/police.jpg',
       },
       {
         cardName: 'Professor',
@@ -110,7 +114,7 @@ async function main() {
         health: 9,
         forward: 5,
         backward: 3,
-        image: '/img/Professor.jpg'
+        image: '/img/Professor.jpg',
       },
       {
         cardName: 'robber',
@@ -120,7 +124,7 @@ async function main() {
         health: 8,
         forward: 6,
         backward: 10,
-        image: '/img/robber.jpg'
+        image: '/img/robber.jpg',
       },
       {
         cardName: 'sailor',
@@ -130,7 +134,7 @@ async function main() {
         health: 8,
         forward: 5,
         backward: 6,
-        image: '/img/sailor.jpg'
+        image: '/img/sailor.jpg',
       },
       {
         cardName: 'witch',
@@ -140,7 +144,7 @@ async function main() {
         health: 3,
         forward: 5,
         backward: 7,
-        image: '/img/witch.jpg'
+        image: '/img/witch.jpg',
       },
       {
         cardName: 'wolf',
@@ -150,10 +154,26 @@ async function main() {
         health: 10,
         forward: 6,
         backward: 9,
-        image: '/img/wolf.jpg'
+        image: '/img/wolf.jpg',
       },
-    ]
-  })
+    ],
+  });
+  console.log({ cards });
+  const users = await prisma.user.createMany({
+    data: [
+      {
+        userName: '1',
+        email: 'ya@mail.ru',
+        password: hashedPassword,
+      },
+      {
+        userName: '2',
+        email: 'kek@mail.ru',
+        password: hashedPassword,
+      },
+    ],
+  });
+  console.log({ users });
 }
 
 main()

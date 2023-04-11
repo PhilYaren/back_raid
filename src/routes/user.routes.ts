@@ -5,14 +5,14 @@ import { User } from '@prisma/client';
 
 const router = Router();
 
-router.get('/', (req, res) => {
-  if (req.session.user) {
+router.get('/', (req: any, res): void => {
+  if (req.session?.user) {
     res.json({ user: req.session.user });
   }
   res.json({ user: null });
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: any, res) => {
   const { email, password } = req.body;
   try {
     const user = await prisma.user.findFirst({
@@ -40,7 +40,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.post('/register', async (req, res) => {
+router.post('/register', async (req: any, res) => {
   const { userName, email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -51,7 +51,7 @@ router.post('/register', async (req, res) => {
         password: hashedPassword,
       },
     });
-    req.session.user = user;
+    req.session.user = { ...user };
     res.json({ user: user });
   } catch (e: unknown) {
     if (e instanceof Error) {
