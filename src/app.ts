@@ -6,7 +6,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import * as http from 'http';
-import wss from './routes/websoket.routes';
+import wss from './websoket/server';
 dotenv.config();
 
 const FileStore = FS(session);
