@@ -5,8 +5,6 @@ function getUser (id: number) {
     where: {
       id: id
     },
-    include: {
-      statistics: true
-    }
   })
+  return user;
 }

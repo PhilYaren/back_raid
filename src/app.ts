@@ -5,6 +5,8 @@ import FS from 'session-file-store';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+import * as http from "http";
+import wss from './routes/websoket.routes';
 dotenv.config();
 
 const FileStore = FS(session);
@@ -36,6 +38,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(session(sessionConFig));
 app.use(cors(corsOptions));
+
+const server = http.createServer(app);
+
+server.on('upgrade', (request, socket, head) => {
+  console.log('Parsing session from request...');
+  wss.handleUpgrade(request, socket, head, (ws) => {
+    wss.emit('connection', ws, request, app.locals.wsClients);
+  })
+
+}
+
+app.locals.wsClients = new Map()
 
 app.listen(PORT, () => {
   console.log('Server is running on port 3000');
