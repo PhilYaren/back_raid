@@ -104,8 +104,22 @@ sessionSocket.on('connection', (socket) => {
   socket.on('create_room', () => {
     const room = String(socket.request.session.user.id);
     socket.join(room);
-    console.log(`room ${socket.rooms} created`);
   });
+
+  socket.on('get_rooms', () => {
+    const rooms = sessionSocket.adapter.rooms;
+    console.log('roooooms ====>', rooms);
+    let roomList: any = [];
+    rooms.forEach((value, key) => {
+      const users = Array.from(value);
+      if (!users.includes(key)) {
+        roomList.push([key, users.length]);
+      }
+    });
+
+    socket.emit(roomList);
+  });
+
   socket.on('join_room', (data) => {
     const room = String(data);
     socket.join(room);
