@@ -6,6 +6,7 @@ import { User } from '@prisma/client';
 const router = Router();
 
 router.get('/', (req, res): void => {
+  console.log(req.session);
   if (req.session?.user) {
     res.json({ user: req.session.user });
     return;

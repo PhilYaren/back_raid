@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import express from 'express';
-import session from 'express-session';
+import session, { Session } from 'express-session';
 import FS from 'session-file-store';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -39,12 +39,13 @@ const sessionConFig: session.SessionOptions = {
 const PORT: number = Number(process.env.PORT) || 3000;
 
 const app = express();
+const sessionMiddleware = session(sessionConFig);
 const server = http.createServer(app);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
-app.use(session(sessionConFig));
+app.use(sessionMiddleware);
 app.use(cors(corsOptions));
 
 app.use('/user', userRoutes);
@@ -56,11 +57,29 @@ export const io = new Server(server, {
   },
 });
 
+declare module 'http' {
+  interface IncomingMessage {
+    session: Session & {
+      user: User;
+    };
+  }
+}
+
+const wrap = (middleware: any) => (socket: any, next: any) =>
+  middleware(socket.request, {}, next);
+
+io.use(wrap(sessionMiddleware));
+
 io.on('connection', (socket) => {
   console.log(`connected ${socket.id}`);
+  console.log(socket.request.session);
+  // console.log(socket.request);
   // socket.on('send_message', (data) => {
   //   io.emit('receive_message', data);
   // });
+  socket.on('set_user', (data) => {
+    socket.request.session.user = data;
+  });
   socket.on('disconnect', (socket) => {
     console.log(`close ${socket}`);
   });
@@ -72,6 +91,7 @@ chat.on('connection', (chatSocket) => {
 
   chatSocket.on('send_message', (data) => {
     console.log(data);
+    console.log(chatSocket.request.session.user);
     chat.emit('receive_message', data);
   });
   chatSocket.on('disconnect', (socket) => {
