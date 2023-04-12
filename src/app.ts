@@ -90,11 +90,27 @@ chat.on('connection', (chatSocket) => {
   console.log(`connected ${chatSocket.id}`);
 
   chatSocket.on('send_message', (data) => {
-    console.log(data);
     console.log(chatSocket.request.session.user);
     chat.emit('receive_message', data);
   });
   chatSocket.on('disconnect', (socket) => {
+    console.log(`close ${socket}`);
+  });
+});
+
+const sessionSocket = io.of('/sessions');
+
+sessionSocket.on('connection', (socket) => {
+  socket.on('create_room', () => {
+    const room = String(socket.request.session.user.id);
+    socket.join(room);
+    console.log(`room ${socket.rooms} created`);
+  });
+  socket.on('join_room', (data) => {
+    const room = String(data);
+    socket.join(room);
+  });
+  socket.on('disconnect', (socket) => {
     console.log(`close ${socket}`);
   });
 });
