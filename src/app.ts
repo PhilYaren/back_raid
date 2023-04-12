@@ -117,7 +117,7 @@ sessionSocket.on('connection', (socket) => {
       }
     });
 
-    socket.emit(roomList);
+    socket.emit('send_rooms', roomList);
   });
 
   socket.on('join_room', (data) => {
