@@ -8,7 +8,7 @@ import morgan from 'morgan';
 import userRoutes from './routes/user.routes';
 import { User } from '../index';
 import http from 'http';
-import {Server} from 'socket.io';
+import { Server } from 'socket.io';
 dotenv.config();
 
 const FileStore = FS(session);
@@ -40,7 +40,7 @@ const PORT: number = Number(process.env.PORT) || 3000;
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
     origin: ['http://localhost:3000', 'http://localhost:5173'],
     credentials: true,
@@ -49,13 +49,25 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
   console.log(`connected ${socket.id}`);
-  socket.on('send_message', (data) => {
-    io.emit('receive_message', data);
-  })
-})
-io.on('close', (socket) => {
-  console.log(`close ${socket.id}`);
-})
+  // socket.on('send_message', (data) => {
+  //   io.emit('receive_message', data);
+  // });
+  socket.on('disconnect', (socket) => {
+    console.log(`close ${socket}`);
+  });
+});
+
+const chat = io.of('/chat');
+chat.on('connection', (chatSocket) => {
+  console.log(`connected ${chatSocket.id}`);
+  chatSocket.on('send_message', (data) => {
+    console.log(data);
+    chat.emit('receive_message', data);
+  });
+  chatSocket.on('disconnect', (socket) => {
+    console.log(`close ${socket}`);
+  });
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
