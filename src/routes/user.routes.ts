@@ -5,14 +5,15 @@ import { User } from '@prisma/client';
 
 const router = Router();
 
-router.get('/', (req: any, res): void => {
+router.get('/', (req, res): void => {
   if (req.session?.user) {
     res.json({ user: req.session.user });
+    return;
   }
   res.json({ user: null });
 });
 
-router.post('/login', async (req: any, res) => {
+router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await prisma.user.findFirst({
@@ -26,7 +27,7 @@ router.post('/login', async (req: any, res) => {
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (passwordMatch) {
         req.session.user = user;
-        res.json({ message: 'Logged in', auth: true });
+        res.json({ user: user });
       } else {
         res.json({ message: 'Wrong password', auth: false });
       }
@@ -40,7 +41,7 @@ router.post('/login', async (req: any, res) => {
   }
 });
 
-router.post('/register', async (req: any, res) => {
+router.post('/register', async (req, res) => {
   const { userName, email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -51,7 +52,7 @@ router.post('/register', async (req: any, res) => {
         password: hashedPassword,
       },
     });
-    req.session.user = { ...user };
+    req.session.user = user;
     res.json({ user: user });
   } catch (e: unknown) {
     if (e instanceof Error) {
@@ -68,7 +69,7 @@ router.get('/logout', (req, res) => {
       res.json({ message: err.message });
     } else {
       res.clearCookie('auth');
-      res.json({ message: 'Logged out', user: null });
+      res.json({ user: null });
     }
   });
 });

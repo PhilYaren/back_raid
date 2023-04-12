@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import * as http from 'http';
 import wss from './websoket/server';
 import userRoutes from './routes/user.routes';
+import { User } from '../index';
 dotenv.config();
 
 const FileStore = FS(session);
@@ -16,6 +17,12 @@ const corsOptions = {
   origin: ['http://localhost:3000', 'http://localhost:5173'],
   credentials: true,
 };
+
+declare module 'express-session' {
+  interface SessionData {
+    user: User;
+  }
+}
 
 const sessionConFig: session.SessionOptions = {
   name: 'auth',
