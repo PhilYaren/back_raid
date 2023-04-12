@@ -40,6 +40,15 @@ const PORT: number = Number(process.env.PORT) || 3000;
 
 const app = express();
 const server = http.createServer(app);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
+app.use(session(sessionConFig));
+app.use(cors(corsOptions));
+
+app.use('/user', userRoutes);
+
 export const io = new Server(server, {
   cors: {
     origin: ['http://localhost:3000', 'http://localhost:5173'],
@@ -60,6 +69,7 @@ io.on('connection', (socket) => {
 const chat = io.of('/chat');
 chat.on('connection', (chatSocket) => {
   console.log(`connected ${chatSocket.id}`);
+
   chatSocket.on('send_message', (data) => {
     console.log(data);
     chat.emit('receive_message', data);
@@ -68,14 +78,6 @@ chat.on('connection', (chatSocket) => {
     console.log(`close ${socket}`);
   });
 });
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
-app.use(session(sessionConFig));
-app.use(cors(corsOptions));
-
-app.use('/user', userRoutes);
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
