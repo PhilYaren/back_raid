@@ -24,7 +24,7 @@ const corsOptions = {
 declare module 'express-session' {
   interface SessionData {
     user?: User;
-    passport?:any
+    passport?: any;
   }
 }
 
@@ -50,7 +50,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(sessionMiddleware);
-app.use(passport.authenticate('session'))
+app.use(passport.authenticate('session'));
 app.use(cors(corsOptions));
 
 app.use('/user', userRoutes);
@@ -67,7 +67,7 @@ declare module 'http' {
   interface IncomingMessage {
     session: Session & {
       user?: User;
-    passport?:any
+      passport?: any;
     };
   }
 }
@@ -114,7 +114,7 @@ sessionSocket.on('connection', (socket) => {
     rooms.forEach((value, key) => {
       const users = Array.from(value);
       if (!users.includes(key)) {
-        roomList.push([key, users.length, socket.request.session.user.id]);
+        roomList.push([key, users.length, socket.request.session.user?.id]);
       }
     });
 
@@ -137,7 +137,6 @@ sessionSocket.on('connection', (socket) => {
         data: {
           sessionId: name,
           size: Number(size),
-          password: password,
         },
       });
       socket.join(room);

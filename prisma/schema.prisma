@@ -76,7 +76,7 @@ model SessionData {
   id        Int    @id @default(autoincrement())
   sessionId String @unique @map("session_id") @db.VarChar(255)
   size      Int
-  state     Json
+  state     Json?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
