@@ -12,6 +12,8 @@ import { User } from '../index';
 import http from 'http';
 import { Server } from 'socket.io';
 import prisma from './database';
+import { deckGenerate } from './game-logic';
+
 dotenv.config();
 
 const FileStore = FS(session);

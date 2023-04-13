@@ -7,16 +7,6 @@ async function main() {
   const cards = await prisma.card.createMany({
     data: [
       {
-        cardName: 'cover',
-        strength: 0,
-        wisdom: 0,
-        magic: 0,
-        health: 0,
-        forward: 0,
-        backward: 0,
-        image: '/img/cover.jpg',
-      },
-      {
         cardName: 'beast',
         strength: 10,
         wisdom: 10,
