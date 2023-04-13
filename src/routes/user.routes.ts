@@ -6,10 +6,15 @@ import { sendMessage } from '../nodemailer/nodemailer';
 
 const router = Router();
 
+
 router.get('/', (req, res): void => {
-  console.log(req.session);
+  console.log('session ===> ' , req.session);
   if (req.session?.user) {
     res.json({ user: req.session.user });
+    return;
+  } 
+  else if(req.session?.passport){
+    res.json({ user: req.session.passport.user })
     return;
   }
   res.json({ user: null });

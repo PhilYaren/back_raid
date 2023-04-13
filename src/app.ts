@@ -6,6 +6,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import userRoutes from './routes/user.routes';
+import passportRoutes from './passportJS/passport';
+import passport from 'passport';
 import { User } from '../index';
 import http from 'http';
 import { Server } from 'socket.io';
@@ -20,7 +22,8 @@ const corsOptions = {
 
 declare module 'express-session' {
   interface SessionData {
-    user: User;
+    user?: User;
+    passport?:any
   }
 }
 
@@ -46,9 +49,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(sessionMiddleware);
+app.use(passport.authenticate('session'))
 app.use(cors(corsOptions));
 
 app.use('/user', userRoutes);
+app.use('/', passportRoutes);
 
 export const io = new Server(server, {
   cors: {
@@ -60,7 +65,8 @@ export const io = new Server(server, {
 declare module 'http' {
   interface IncomingMessage {
     session: Session & {
-      user: User;
+      user?: User;
+    passport?:any
     };
   }
 }
@@ -102,7 +108,7 @@ const sessionSocket = io.of('/sessions');
 
 sessionSocket.on('connection', (socket) => {
   socket.on('create_room', () => {
-    const room = String(socket.request.session.user.id);
+    const room = String(socket.request.session?.user?.id || socket.request.session?.passport?.user);
     socket.join(room);
   });
 
