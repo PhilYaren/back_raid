@@ -102,51 +102,109 @@ chat.on('connection', (chatSocket) => {
 const sessionSocket = io.of('/sessions');
 
 sessionSocket.on('connection', (socket) => {
-  socket.on('create_room', async ({ name, size, password }) => {
-    const room = String(socket.request.session.user.id);
-    const session = await prisma.sessionData.create({
-      data: {
-        sessionId: name,
-        size: size,
-        password: password,
-      },
-    });
-    socket.join(room);
-  });
-
-  socket.on('get_rooms', () => {
+  function list() {
     const rooms = sessionSocket.adapter.rooms;
-    console.log('roooooms ====>', rooms);
     let roomList: any = [];
     rooms.forEach((value, key) => {
       const users = Array.from(value);
       if (!users.includes(key)) {
-        roomList.push([key, users.length]);
+        roomList.push([key, users.length, socket.request.session.user.id]);
       }
     });
+
+    return roomList;
+  }
+
+  socket.on(
+    'create_room',
+    async ({
+      name,
+      size,
+      password,
+    }: {
+      name: string;
+      size: string;
+      password: string;
+    }) => {
+      const room = name;
+      const session = await prisma.sessionData.create({
+        data: {
+          sessionId: name,
+          size: Number(size),
+          password: password,
+        },
+      });
+      socket.join(room);
+      console.log('session ====>', sessionSocket.adapter.rooms);
+      const roomList = list();
+      console.log('roomList ====>', roomList);
+      socket.emit('join_room', { name: room });
+      sessionSocket.emit('send_rooms', roomList);
+    }
+  );
+
+  socket.on('get_rooms', async () => {
+    const roomList = list();
     console.log('roomList ====>', roomList);
 
-    socket.emit('send_rooms', roomList);
+    sessionSocket.emit('send_rooms', roomList);
   });
 
-  socket.on('join_room', async ({ name, password }) => {
+  socket.on('join_room', async ({ name }) => {
     const session = await prisma.sessionData.findFirst({
       where: {
         sessionId: name,
       },
     });
-    if (session !== null && session.password === password) {
+    if (session !== null) {
       const room = sessionSocket.adapter.rooms.get(session.sessionId);
       let size: number = 0;
       if (room) {
         size = room.size;
       }
       if (size !== 0 && size <= session.size) {
+        console.log('session.sessionId ====>', session.sessionId);
         socket.join(session.sessionId);
+        socket.emit('join_room', { name: session.sessionId });
       }
     }
   });
-  socket.on('disconnect', (socket) => {
+  socket.on('init_player', (data: any) => {
+    const { room, user } = data;
+  });
+
+  socket.on('send_message', (data) => {
+    const { room, message, user, time } = data;
+    sessionSocket.in(room).emit('receive_message', { message, user, time });
+  });
+
+  socket.on('delete_room', async ({ name }) => {
+    const session = await prisma.sessionData.findFirst({
+      where: {
+        sessionId: name,
+      },
+    });
+    if (session) {
+      await prisma.sessionData.delete({
+        where: {
+          sessionId: name,
+        },
+      });
+    }
+    sessionSocket.in(name).disconnectSockets(true);
+  });
+  socket.on('disconnect', async (socket) => {
+    const roomsData = list();
+    const rooms = roomsData.map((room: any) => room[0]);
+    await prisma.sessionData.deleteMany({
+      where: {
+        NOT: {
+          sessionId: {
+            in: rooms,
+          },
+        },
+      },
+    });
     console.log(`close ${socket}`);
   });
 });
