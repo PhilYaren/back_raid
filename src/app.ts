@@ -9,6 +9,7 @@ import userRoutes from './routes/user.routes';
 import { User } from '../index';
 import http from 'http';
 import { Server } from 'socket.io';
+import prisma from './database';
 dotenv.config();
 
 const FileStore = FS(session);
@@ -101,8 +102,15 @@ chat.on('connection', (chatSocket) => {
 const sessionSocket = io.of('/sessions');
 
 sessionSocket.on('connection', (socket) => {
-  socket.on('create_room', () => {
+  socket.on('create_room', async ({ name, size, password }) => {
     const room = String(socket.request.session.user.id);
+    const session = await prisma.sessionData.create({
+      data: {
+        sessionId: name,
+        size: size,
+        password: password,
+      },
+    });
     socket.join(room);
   });
 
@@ -116,13 +124,27 @@ sessionSocket.on('connection', (socket) => {
         roomList.push([key, users.length]);
       }
     });
+    console.log('roomList ====>', roomList);
 
     socket.emit('send_rooms', roomList);
   });
 
-  socket.on('join_room', (data) => {
-    const room = String(data);
-    socket.join(room);
+  socket.on('join_room', async ({ name, password }) => {
+    const session = await prisma.sessionData.findFirst({
+      where: {
+        sessionId: name,
+      },
+    });
+    if (session !== null && session.password === password) {
+      const room = sessionSocket.adapter.rooms.get(session.sessionId);
+      let size: number = 0;
+      if (room) {
+        size = room.size;
+      }
+      if (size !== 0 && size <= session.size) {
+        socket.join(session.sessionId);
+      }
+    }
   });
   socket.on('disconnect', (socket) => {
     console.log(`close ${socket}`);

@@ -56,3 +56,14 @@ model Card {
 
   @@map("cards")
 }
+
+model SessionData {
+  id        Int      @id @default(autoincrement())
+  sessionId String   @unique @map("session_id") @db.VarChar(255)
+  size      Int
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("session_data")
+}
