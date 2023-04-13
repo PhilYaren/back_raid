@@ -1,6 +1,10 @@
 DATABASE_URL='postgresql://postgres:postgres@localhost:5432/your_db?schema=public' # Database server url
 PORT=3000 #server port
 SECRET=dlkfslkjfjlvckjakj289iewnm #secret key
+//Nodemailer
 EMAIL='ne@yandex.ru'
 EMAILPASSWORD='Rb'
 SERVICE='Yandex'
+//passportJS
+GOOGLE_CLIENT_ID=__INSERT_CLIENT_ID_HERE__
+GOOGLE_CLIENT_SECRET=__INSERT_CLIENT_SECRET_HERE_

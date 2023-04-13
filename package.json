@@ -23,12 +23,15 @@
   "homepage": "https://github.com/PhilYaren/back_raid#readme",
   "dependencies": {
     "@prisma/client": "^4.12.0",
+    "@types/passport-google-oauth2": "^0.1.5",
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "nodemailer": "^6.9.1",
+    "passport": "^0.6.0",
+    "passport-google-oidc": "^0.1.0",
     "session-file-store": "^1.5.0",
     "socket.io": "^4.6.1",
     "ws": "^8.13.0"
@@ -41,6 +44,7 @@
     "@types/morgan": "^1.9.4",
     "@types/node": "^18.15.11",
     "@types/nodemailer": "^6.4.7",
+    "@types/passport": "^1.0.12",
     "@types/session-file-store": "^1.2.2",
     "@types/ws": "^8.5.4",
     "morgan": "^1.10.0",
