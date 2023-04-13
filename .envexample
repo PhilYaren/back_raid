@@ -1,4 +1,6 @@
 DATABASE_URL='postgresql://postgres:postgres@localhost:5432/your_db?schema=public' # Database server url
 PORT=3000 #server port
 SECRET=dlkfslkjfjlvckjakj289iewnm #secret key
-
+EMAIL='ne@yandex.ru'
+EMAILPASSWORD='Rb'
+SERVICE='Yandex'

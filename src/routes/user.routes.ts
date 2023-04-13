@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import prisma from '../database';
 import { User } from '@prisma/client';
+import { sendMessage } from '../nodemailer/nodemailer';
 
 const router = Router();
 
@@ -44,6 +45,7 @@ router.post('/login', async (req, res) => {
 
 router.post('/register', async (req, res) => {
   const { userName, email, password } = req.body;
+  
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user: User = await prisma.user.create({
@@ -54,8 +56,12 @@ router.post('/register', async (req, res) => {
       },
     });
     req.session.user = user;
+    sendMessage(email);
+    
     res.json({ user: user });
   } catch (e: unknown) {
+    console.log(e);
+    
     if (e instanceof Error) {
       res.json({ message: e.message, auth: false });
     } else {
