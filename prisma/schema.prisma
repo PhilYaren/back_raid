@@ -18,7 +18,7 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  statistics Statistic[]
+  statistics            Statistic[]
   federated_credentials FederatedCredential[]
 
   @@map("users")
@@ -59,13 +59,12 @@ model Card {
 }
 
 model FederatedCredential {
-  id    Int   @id @default(autoincrement())
-  provider    String    @db.VarChar(255)
-  subject   String
+  id       Int    @id @default(autoincrement())
+  provider String @db.VarChar(255)
+  subject  String
 
   userId Int  @map("user_id")
   user   User @relation(fields: [userId], references: [id])
-
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -74,10 +73,11 @@ model FederatedCredential {
 }
 
 model SessionData {
-  id        Int      @id @default(autoincrement())
-  sessionId String   @unique @map("session_id") @db.VarChar(255)
+  id        Int    @id @default(autoincrement())
+  sessionId String @unique @map("session_id") @db.VarChar(255)
   size      Int
-  password  String   @db.VarChar(255)
+  state     Json
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
