@@ -1,2 +1,3 @@
 export { deckGenerate } from './deck';
-export { handInit } from './hand';
+export { handInit, handAddCard, handRemoveCard } from './hand';
+export { handlePosition } from './position';

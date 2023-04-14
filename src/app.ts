@@ -12,7 +12,13 @@ import { User } from '../index';
 import http from 'http';
 import { Server } from 'socket.io';
 import prisma from './database';
-import { deckGenerate, handInit } from './game-logic';
+import {
+  deckGenerate,
+  handInit,
+  handAddCard,
+  handRemoveCard,
+} from './game-logic';
+import { Card, Prisma } from '@prisma/client';
 
 dotenv.config();
 
@@ -68,7 +74,7 @@ export const io = new Server(server, {
 declare module 'http' {
   interface IncomingMessage {
     session: Session & {
-      user?: User;
+      user: User;
       passport?: any;
     };
   }
@@ -81,14 +87,11 @@ io.use(wrap(sessionMiddleware));
 
 io.on('connection', (socket) => {
   console.log(`connected ${socket.id}`);
-  console.log(socket.request.session);
-  // console.log(socket.request);
-  // socket.on('send_message', (data) => {
-  //   io.emit('receive_message', data);
-  // });
+
   socket.on('set_user', (data) => {
     socket.request.session.user = data;
   });
+
   socket.on('disconnect', (socket) => {
     console.log(`close ${socket}`);
   });
@@ -102,6 +105,7 @@ chat.on('connection', (chatSocket) => {
     console.log(chatSocket.request.session.user);
     chat.emit('receive_message', data);
   });
+
   chatSocket.on('disconnect', (socket) => {
     console.log(`close ${socket}`);
   });
@@ -125,34 +129,46 @@ sessionSocket.on('connection', (socket) => {
 
   socket.on(
     'create_room',
-    async ({
-      name,
-      size,
-      password,
-    }: {
-      name: string;
-      size: string;
-      password: string;
-    }) => {
+    async ({ name, size }: { name: string; size: string }) => {
       const room = name;
+      const deck: object[] = await deckGenerate();
+      const creator = String(socket.request.session.user?.id);
+
+      const state: Prisma.JsonObject = {
+        players: {
+          [creator]: {
+            hand: [],
+            position: 1,
+          },
+        },
+        deck: deck,
+        messages: [],
+      };
+
       const session = await prisma.sessionData.create({
         data: {
           sessionId: name,
           size: Number(size),
+          state: state,
         },
       });
+
       socket.join(room);
-      console.log('session ====>', sessionSocket.adapter.rooms);
       const roomList = list();
-      console.log('roomList ====>', roomList);
-      socket.emit('join_room', { name: room });
+      socket.emit('join_room', { name: room, state: session.state });
       sessionSocket.emit('send_rooms', roomList);
+      const message = {
+        user: socket.request.session.user.id,
+        message: 'Присоединился к комнате',
+        time: new Date().toLocaleTimeString('ru-RU'),
+      };
+      sessionSocket.in(room).emit('update_state', { state: session.state });
+      sessionSocket.in(room).emit('receive_message', message);
     }
   );
 
   socket.on('get_rooms', async () => {
     const roomList = list();
-    console.log('roomList ====>', roomList);
 
     sessionSocket.emit('send_rooms', roomList);
   });
@@ -163,21 +179,51 @@ sessionSocket.on('connection', (socket) => {
         sessionId: name,
       },
     });
+
     if (session !== null) {
+      const state: any = session.state;
+      const user = String(socket.request.session.user?.id);
+      const json = {
+        ...state,
+        players: {
+          ...state.players,
+          [user]: {
+            hand: [],
+            position: 1,
+          },
+        },
+      };
+      const newState = await prisma.sessionData.update({
+        where: {
+          sessionId: name,
+        },
+        data: {
+          state: json,
+        },
+      });
+
       const room = sessionSocket.adapter.rooms.get(session.sessionId);
       let size: number = 0;
+
       if (room) {
         size = room.size;
       }
+
       if (size !== 0 && size <= session.size) {
-        console.log('session.sessionId ====>', session.sessionId);
         socket.join(session.sessionId);
-        socket.emit('join_room', { name: session.sessionId });
+        socket.emit('join_room', { name: session.sessionId, state: json });
+        const message = {
+          user: socket.request.session.user.id,
+          message: 'Присоединился к комнате',
+          time: new Date().toLocaleTimeString('ru-RU'),
+        };
+        console.log('state', newState.state);
+        sessionSocket
+          .in(session.sessionId)
+          .emit('update_state', newState.state);
+        sessionSocket.in(session.sessionId).emit('receive_message', message);
       }
     }
-  });
-  socket.on('init_player', (data: any) => {
-    const { room, user } = data;
   });
 
   socket.on('send_message', (data) => {
@@ -191,6 +237,7 @@ sessionSocket.on('connection', (socket) => {
         sessionId: name,
       },
     });
+
     if (session) {
       await prisma.sessionData.delete({
         where: {
@@ -198,8 +245,10 @@ sessionSocket.on('connection', (socket) => {
         },
       });
     }
+
     sessionSocket.in(name).disconnectSockets(true);
   });
+
   socket.on('disconnect', async (socket) => {
     const roomsData = list();
     const rooms = roomsData.map((room: any) => room[0]);
