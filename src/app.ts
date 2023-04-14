@@ -116,7 +116,7 @@ sessionSocket.on('connection', (socket) => {
         roomList.push([key, users.length]);
       }
     });
-
+    console.log(roomList);
     socket.emit('send_rooms', roomList);
   });
 
