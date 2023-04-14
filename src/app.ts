@@ -12,7 +12,7 @@ import { User } from '../index';
 import http from 'http';
 import { Server } from 'socket.io';
 import prisma from './database';
-import { deckGenerate } from './game-logic';
+import { deckGenerate, handInit } from './game-logic';
 
 dotenv.config();
 
