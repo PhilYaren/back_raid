@@ -158,7 +158,7 @@ sessionSocket.on('connection', (socket) => {
       socket.emit('join_room', { name: room, state: session.state });
       sessionSocket.emit('send_rooms', roomList);
       const message = {
-        user: socket.request.session.user.id,
+        user: socket.request.session.user.userName,
         message: 'Присоединился к комнате',
         time: new Date().toLocaleTimeString('ru-RU'),
       };
