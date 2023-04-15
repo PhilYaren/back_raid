@@ -1,7 +1,3 @@
-// import { io } from '../app';
-//
-// io.on('connection', (socket) => {
-//   console.log(`connected ${socket.id}`);
-// });
-//
-// io.on();
+export { mainConnection } from './main_socket';
+export { chatConnection } from './chat';
+export { sessionConnection } from './sessions';

@@ -7,14 +7,14 @@ function randomIndex(deck: Card[]) {
 
 export function handInit(players: any, deck: Card[]) {
   for (const player in players) {
-    players.player = [];
+    players[player].hand = [];
     for (let i = 0; i < 3; i++) {
       const random = randomIndex(deck);
       const card = deck.splice(random, 1)[0];
-      players.player.push(card);
+      players[player].hand.push(card);
     }
   }
-  return players;
+  return [players, deck];
 }
 
 export async function handAddCard(hand: any, deck: Card[]) {
