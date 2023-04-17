@@ -29,6 +29,8 @@ export async function createRoom(
       },
     },
     deck: deck,
+    current: 0,
+    order: [creator],
     messages: [],
   };
   const session = await sessionCreate(name, size, state);
@@ -69,6 +71,7 @@ export async function joinRoom(
             position: 1,
           },
         },
+        order: [...state.order, user],
       };
     }
 
