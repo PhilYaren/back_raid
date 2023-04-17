@@ -152,15 +152,18 @@ export async function movePlayer(
   data: { id: string; position: number }
 ) {
   const session = await getSession(room);
-  if (session) {
+  const regEx = /[0-9]+/im;
+  const idReg = data.id.match(regEx);
+  if (session && idReg) {
+    const id = idReg[0];
     const state: any = session.state;
     const players = state.players;
-    const newPosition = state.players[data.id].position + data.position;
+    const newPosition = state.players[id].position + data.position;
 
     const newPlayers = {
       ...players,
-      [data.id]: {
-        ...players[data.id],
+      [id]: {
+        ...players[id],
         position: newPosition,
       },
     };
