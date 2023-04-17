@@ -4,6 +4,7 @@ import {
   deleteRoom,
   disconnect,
   joinRoom,
+  movePlayer,
   startGame,
 } from './listeners/session.listeners';
 
@@ -47,6 +48,10 @@ export function sessionConnection(io: Server) {
     socket.on('send_message', (data) => {
       const { room, message, user, time } = data;
       sessionSocket.in(room).emit('receive_message', { message, user, time });
+    });
+
+    socket.on('move_player', async (data) => {
+      await movePlayer(sessionSocket, socket, data.room, data.data);
     });
 
     socket.on('delete_room', async ({ name }) => {

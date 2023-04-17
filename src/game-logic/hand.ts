@@ -17,7 +17,10 @@ export function handInit(players: any, deck: Card[]) {
   return [players, deck];
 }
 
-export async function handAddCard(hand: any, deck: Card[]) {
+export async function handAddCard(
+  hand: any,
+  deck: (Card & { unique: string })[]
+) {
   if (deck.length === 0) {
     deck = await deckGenerate();
   }
@@ -28,8 +31,10 @@ export async function handAddCard(hand: any, deck: Card[]) {
   return hand;
 }
 
-export function handRemoveCard(hand: any, card: Card) {
-  const index = hand.findIndex((item: Card) => item.id === card.id);
+export function handRemoveCard(hand: any, card: Card & { unique: string }) {
+  const index = hand.findIndex(
+    (item: Card & { unique: string }) => item.unique === card.unique
+  );
   hand.splice(index, 1);
 
   return hand;

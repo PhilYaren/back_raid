@@ -144,3 +144,34 @@ export async function disconnect(socket: DisconnectReason, list: () => any[]) {
   await deleteEmptyRooms(rooms);
   console.log(`socket ${socket} closed`);
 }
+
+export async function movePlayer(
+  server: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  socket: Socket,
+  room: string,
+  data: { id: string; position: number }
+) {
+  const session = await getSession(room);
+  if (session) {
+    const state: any = session.state;
+    const players = state.players;
+    const newPosition = state.players[data.id].position + data.position;
+
+    const newPlayers = {
+      ...players,
+      [data.id]: {
+        ...players[data.id],
+        position: newPosition,
+      },
+    };
+
+    const newState = {
+      ...state,
+      players: newPlayers,
+    };
+
+    const newSession = await updateState(room, newState);
+
+    server.in(room).emit('update_state', newSession.state);
+  }
+}
