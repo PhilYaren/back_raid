@@ -7,6 +7,7 @@ import {
   movePlayer,
   startGame,
 } from './listeners/session.listeners';
+import { battleState } from './listeners/battlestate.listener';
 
 export function sessionConnection(io: Server) {
   const sessionSocket = io.of('/sessions');
@@ -59,6 +60,9 @@ export function sessionConnection(io: Server) {
         data.last,
         data.final
       );
+    });
+    socket.on('action', async (room, data, opponents) => {
+      battleState(sessionSocket, socket, room, data, opponents);
     });
 
     socket.on('delete_room', async ({ name }) => {

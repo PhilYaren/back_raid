@@ -26,12 +26,12 @@ export async function handAddCard(hand: any, deck: deckCard[]) {
   const card = deck.splice(random, 1)[0];
   hand.push(card);
 
-  return hand;
+  return [hand, deck];
 }
 
-export function handRemoveCard(hand: any, card: deckCard) {
-  const index = hand.findIndex((item: deckCard) => item.id === card.id);
-  hand.splice(index, 1);
+export function handRemoveCard(hand: any) {
+  const randIndex = randomIndex(hand);
+  hand.splice(randIndex, 1);
 
   return hand;
 }
