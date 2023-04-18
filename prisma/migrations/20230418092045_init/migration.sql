@@ -58,7 +58,8 @@ CREATE TABLE "session_data" (
     "id" SERIAL NOT NULL,
     "session_id" VARCHAR(255) NOT NULL,
     "size" INTEGER NOT NULL,
-    "state" JSONB NOT NULL,
+    "state" JSONB,
+    "battle_state" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
