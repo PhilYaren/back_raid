@@ -73,10 +73,11 @@ model FederatedCredential {
 }
 
 model SessionData {
-  id        Int    @id @default(autoincrement())
-  sessionId String @unique @map("session_id") @db.VarChar(255)
-  size      Int
-  state     Json?
+  id          Int    @id @default(autoincrement())
+  sessionId   String @unique @map("session_id") @db.VarChar(255)
+  size        Int
+  state       Json?
+  battleState Json?  @map("battle_state")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
