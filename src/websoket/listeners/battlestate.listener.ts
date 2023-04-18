@@ -51,8 +51,8 @@ export async function battleState(
         modal: true,
         color: color,
         opponents: {
-          current: [],
-          opponent: [],
+          [current]: [],
+          [opponent]: [],
         },
       };
       const newAction = await updateAction(room, action);
@@ -82,8 +82,8 @@ export async function battleState(
         modal: true,
         color: color,
         opponents: {
-          current: [],
-          opponent: [],
+          [current]: [],
+          [opponent]: [],
         },
       };
       const newAction = await updateAction(room, action);
@@ -98,8 +98,8 @@ export async function battleState(
         modal: true,
         color: color,
         opponents: {
-          current: [],
-          opponent: [],
+          [current]: [],
+          [opponent]: [],
         },
       };
       const newAction = await updateAction(room, action);
