@@ -51,7 +51,14 @@ export function sessionConnection(io: Server) {
     });
 
     socket.on('move_player', async (data) => {
-      await movePlayer(sessionSocket, socket, data.room, data.data);
+      await movePlayer(
+        sessionSocket,
+        socket,
+        data.room,
+        data.data,
+        data.last,
+        data.final
+      );
     });
 
     socket.on('delete_room', async ({ name }) => {

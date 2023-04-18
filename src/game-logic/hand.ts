@@ -1,11 +1,12 @@
 import { Card } from '@prisma/client';
 import { deckGenerate } from './deck';
+import { deckCard } from '../../index';
 
-function randomIndex(deck: Card[]) {
+function randomIndex(deck: deckCard[]) {
   return Math.floor(Math.random() * deck.length);
 }
 
-export function handInit(players: any, deck: Card[]) {
+export function handInit(players: any, deck: deckCard[]) {
   for (const player in players) {
     players[player].hand = [];
     for (let i = 0; i < 3; i++) {
@@ -17,10 +18,7 @@ export function handInit(players: any, deck: Card[]) {
   return [players, deck];
 }
 
-export async function handAddCard(
-  hand: any,
-  deck: (Card & { unique: string })[]
-) {
+export async function handAddCard(hand: any, deck: deckCard[]) {
   if (deck.length === 0) {
     deck = await deckGenerate();
   }
@@ -31,10 +29,8 @@ export async function handAddCard(
   return hand;
 }
 
-export function handRemoveCard(hand: any, card: Card & { unique: string }) {
-  const index = hand.findIndex(
-    (item: Card & { unique: string }) => item.unique === card.unique
-  );
+export function handRemoveCard(hand: any, card: deckCard) {
+  const index = hand.findIndex((item: deckCard) => item.id === card.id);
   hand.splice(index, 1);
 
   return hand;

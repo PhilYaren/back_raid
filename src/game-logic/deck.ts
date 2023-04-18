@@ -1,6 +1,7 @@
 import prisma from '../database';
 import { v4 } from 'uuid';
 import { Card } from '@prisma/client';
+import { deckCard } from '../../index';
 
 export async function deckGenerate() {
   const four = [
@@ -37,12 +38,18 @@ export async function deckGenerate() {
   });
   const deck = [];
   for (const fourCard of fourCards) {
-    const newCard: Card & { unique: string } = { ...fourCard, unique: v4() };
-    deck.push(...[newCard, newCard, newCard, newCard]);
+    const newCards: deckCard[] = [];
+    for (let i = 0; i < 4; i++) {
+      newCards.push({ ...fourCard, id: v4() });
+    }
+    deck.push(...newCards);
   }
   for (const fiveCard of fiveCards) {
-    const newCard: Card & { unique: string } = { ...fiveCard, unique: v4() };
-    deck.push(...[newCard, newCard, newCard, newCard, newCard]);
+    const newCards: deckCard[] = [];
+    for (let i = 0; i < 5; i++) {
+      newCards.push({ ...fiveCard, id: v4() });
+    }
+    deck.push(...newCards);
   }
   return deck;
 }

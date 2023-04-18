@@ -149,7 +149,9 @@ export async function movePlayer(
   server: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   socket: Socket,
   room: string,
-  data: { id: string; position: number }
+  data: { id: string; position: number },
+  last?: Boolean,
+  final?: Boolean
 ) {
   const session = await getSession(room);
   const regEx = /[0-9]+/im;
@@ -176,5 +178,12 @@ export async function movePlayer(
     const newSession = await updateState(room, newState);
 
     server.in(room).emit('update_state', newSession.state);
+    if (last) {
+      server.in(room).emit('receive_message', {
+        user: 'kek',
+        message: 'Дошел',
+        time: new Date().toLocaleTimeString('ru-RU'),
+      });
+    }
   }
 }
