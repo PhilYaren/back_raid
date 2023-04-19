@@ -18,7 +18,7 @@ dotenv.config();
 const FileStore = FS(session);
 
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
   credentials: true,
 };
 
@@ -59,7 +59,7 @@ app.use('/', passportRoutes);
 
 export const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:5173'],
+    origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
     credentials: true,
   },
 });
