@@ -4,6 +4,7 @@ import { getSession, updateState } from '../../database/session.query';
 import { handAddCard, handRemoveCard } from '../../game-logic';
 import { resetAction, updateAction } from '../../game-logic/action.query';
 import { deckCard } from '../../../index';
+import { stealCard } from '../../game-logic/hand';
 
 export async function battleState(
   server: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
@@ -44,24 +45,36 @@ export async function battleState(
         },
         deck,
       };
+      if (color === 'white') {
+        const order = state.order;
+
+        const newCurrent =
+          order.length !== state.current + 1 ? state.current + 1 : 0;
+        console.log('newCurrent', newCurrent);
+        state = {
+          ...state,
+          current: newCurrent,
+        };
+      }
 
       const newState = await updateState(room, state);
       server.in(room).emit('update_state', newState.state);
 
-      action = {
-        ...action,
-        modal: true,
-        color: typeData,
-        opponents: {
-          [current]: [],
-          [opponent]: [],
-        },
-      };
-      const newAction = await updateAction(room, action);
-
-      server.in(room).emit('set_modal', action.modal);
-      server.in(room).emit('set_color', action.color);
-      server.in(room).emit('set_opponents', action.opponents);
+      if (color !== 'white') {
+        action = {
+          ...action,
+          modal: true,
+          color: typeData,
+          opponents: {
+            [current]: [],
+            [opponent]: [],
+          },
+        };
+        const newAction = await updateAction(room, action);
+        server.in(room).emit('set_modal', action.modal);
+        server.in(room).emit('set_color', action.color);
+        server.in(room).emit('set_opponents', action.opponents);
+      }
     } else if (effect === 'flower') {
       const hand = handRemoveCard(state.players[current].hand);
       state = {
@@ -92,6 +105,77 @@ export async function battleState(
       server.in(room).emit('set_modal', action.modal);
       server.in(room).emit('set_color', action.color);
       server.in(room).emit('set_opponents', action.opponents);
+    } else if (color === 'violet') {
+      const current = state.current;
+      const order: any = state.order;
+      const currentPlayer = order[current];
+      const stolenFrom = order.length !== current + 1 ? current + 1 : 0;
+      const stolenPlayer = order[stolenFrom];
+      if (state.players[stolenPlayer].hand.length > 2) {
+        const [newCurrent, newStolen] = stealCard(
+          state.players[currentPlayer],
+          state.players[stolenPlayer]
+        );
+        state = {
+          ...state,
+          players: {
+            ...state.players,
+            [currentPlayer]: newCurrent,
+            [stolenPlayer]: newStolen,
+          },
+        };
+      }
+      state = {
+        ...state,
+        current: stolenFrom,
+      };
+
+      await updateState(room, state);
+
+      server.in(room).emit('update_state', state);
+    } else if (color === 'black') {
+      const blackTiles = [1, 11, 21, 27, 31, 41, 46, 48];
+      const pos = state.players[current].position;
+      const index = blackTiles.indexOf(pos);
+      const order = state.order;
+      const newCurrent =
+        order.length !== state.current + 1 ? state.current + 1 : 0;
+      state = {
+        ...state,
+        players: {
+          ...state.players,
+          [current]: {
+            ...state.players[current],
+            position: blackTiles[index - 1],
+          },
+        },
+        current: newCurrent,
+      };
+      await updateState(room, state);
+
+      server.in(room).emit('update_state', state);
+    } else if (color === 'white') {
+      const whiteTiles = [10, 15, 25, 33, 43];
+      const pos = state.players[current].position;
+      const index = whiteTiles.indexOf(pos);
+      const order = state.order;
+      const newCurrent =
+        order.length !== state.current + 1 ? state.current + 1 : 0;
+
+      state = {
+        ...state,
+        players: {
+          ...state.players,
+          [current]: {
+            ...state.players[current],
+            position: whiteTiles[index + 1],
+          },
+        },
+        current: newCurrent,
+      };
+      await updateState(room, state);
+
+      server.in(room).emit('update_state', state);
     } else {
       action = {
         ...action,
@@ -166,7 +250,7 @@ export async function battleListener(
         }
         server.in(room).emit('update_state', newState);
         server.in(room).emit('set_opponents', newAction.opponents);
-        server.in(room).emit('outcome', outcome, move);
+        server.in(room).emit('outcome', outcome, move, newState);
       } else {
         const newState = {
           ...state,
@@ -193,10 +277,50 @@ export async function resetActionListener(
   socket: Socket,
   room: string
 ) {
-  const session = await resetAction(room);
-  const action: any = session.actionState;
+  const session = await getSession(room);
+  if (session) {
+    const { state, actionState }: { state: any; actionState: any } = session;
+    const { opponents } = actionState;
+    let { players, deck } = state;
+
+    for (const key in opponents) {
+      const [newHand, newDeck] = await handAddCard(players[key].hand, deck);
+      players[key].hand = newHand;
+      deck = newDeck;
+    }
+    const newState = {
+      ...state,
+      players,
+    };
+    await updateState(room, newState);
+
+    server.in(room).emit('update_state', newState);
+  }
+
+  const { actionState: action }: { actionState: any } = await resetAction(room);
 
   server.in(room).emit('set_modal', action.modal);
   server.in(room).emit('set_color', action.color);
   server.in(room).emit('set_opponents', action.opponents);
+}
+
+export async function changeCurrentHandler(
+  server: Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  socket: Socket,
+  room: string
+) {
+  const session = await getSession(room);
+  if (session) {
+    const { state }: { state: any } = session;
+    const { players, deck } = state;
+    const current = state.current;
+    const newCurrent =
+      state.order.length !== state.current + 1 ? state.current + 1 : 0;
+    const newState = {
+      ...state,
+      current: newCurrent,
+    };
+    await updateState(room, newState);
+    server.in(room).emit('current', newCurrent);
+  }
 }

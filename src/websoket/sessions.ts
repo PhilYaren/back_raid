@@ -10,6 +10,7 @@ import {
 import {
   battleListener,
   battleState,
+  changeCurrentHandler,
   resetActionListener,
 } from './listeners/battlestate.listener';
 
@@ -83,6 +84,10 @@ export function sessionConnection(io: Server) {
 
     socket.on('reset_battle', async (room) => {
       await resetActionListener(sessionSocket, socket, room);
+    });
+
+    socket.on('change_current', async (room) => {
+      await changeCurrentHandler(sessionSocket, socket, room);
     });
 
     socket.on('delete_room', async ({ name }) => {

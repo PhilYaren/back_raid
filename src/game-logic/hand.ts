@@ -35,3 +35,11 @@ export function handRemoveCard(hand: any) {
 
   return hand;
 }
+
+export function stealCard(current: any, stolen: any) {
+  const randIndex = randomIndex(stolen.hand);
+  const card = stolen.hand.splice(randIndex, 1)[0];
+  current.hand.push(card);
+
+  return [current, stolen];
+}
