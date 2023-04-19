@@ -7,7 +7,11 @@ import {
   movePlayer,
   startGame,
 } from './listeners/session.listeners';
-import { battleState } from './listeners/battlestate.listener';
+import {
+  battleListener,
+  battleState,
+  resetActionListener,
+} from './listeners/battlestate.listener';
 
 export function sessionConnection(io: Server) {
   const sessionSocket = io.of('/sessions');
@@ -62,7 +66,23 @@ export function sessionConnection(io: Server) {
       );
     });
     socket.on('action', async (room, data, opponents) => {
-      battleState(sessionSocket, socket, room, data, opponents);
+      await battleState(sessionSocket, socket, room, data, opponents);
+    });
+
+    socket.on('battle', async (room, card, id, color, current) => {
+      await battleListener(
+        sessionSocket,
+        socket,
+        room,
+        card,
+        id,
+        color,
+        current
+      );
+    });
+
+    socket.on('reset_battle', async (room) => {
+      await resetActionListener(sessionSocket, socket, room);
     });
 
     socket.on('delete_room', async ({ name }) => {
