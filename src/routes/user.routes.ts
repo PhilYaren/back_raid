@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import prisma from '../database';
-import { User } from '@prisma/client';
+import { User, Statistic} from '@prisma/client';
 import { sendMessage } from '../nodemailer/nodemailer';
 
 const router = Router();
@@ -81,6 +81,19 @@ router.get('/logout', (req, res) => {
       res.json({ user: null });
     }
   });
+});
+
+router.get('/statistic', async (req, res) => {
+  const playerId = req.session.user?.id || req.session.passport.id
+  try {
+    const statistic = await prisma.statistic.findMany({where: {
+      playerId,
+    }
+  })
+    res.json({statistic: statistic})
+  } catch (e: unknown) {
+    console.log(e);
+  }
 });
 
 export default router;
