@@ -88,7 +88,7 @@ router.get('/login/federated/google', passport.authenticate('google'));
 router.get(
   '/oauth2/redirect/google',
   passport.authenticate('google', {
-    successRedirect: 'http://localhost:5173/login',
+    successRedirect: 'http://localhost:5173/',
     failureRedirect: '/login',
   })
 );
