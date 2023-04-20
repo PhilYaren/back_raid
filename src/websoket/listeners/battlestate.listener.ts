@@ -250,7 +250,9 @@ export async function battleListener(
         }
         server.in(room).emit('update_state', newState);
         server.in(room).emit('set_opponents', newAction.opponents);
-        server.in(room).emit('outcome', outcome, move, newState);
+        setTimeout(() => {
+          server.in(room).emit('outcome', outcome, move, newState);
+        }, 100);
       } else {
         const newState = {
           ...state,
