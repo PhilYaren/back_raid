@@ -179,11 +179,11 @@ export async function movePlayer(
 
     server.in(room).emit('update_state', newSession.state);
     if (last) {
-      server.in(room).emit('receive_message', {
-        user: 'kek',
-        message: 'Дошел',
-        time: new Date().toLocaleTimeString('ru-RU'),
-      });
+      // server.in(room).emit('receive_message', {
+      //   user: 'kek',
+      //   message: 'Дошел',
+      //   time: new Date().toLocaleTimeString('ru-RU'),
+      // });
     }
   }
 }
